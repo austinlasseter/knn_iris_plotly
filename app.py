@@ -14,7 +14,76 @@ file.close()
 ########### Read in the dataset ######
 train=pd.read_pickle('resources/train.pkl')
 
-########## Set up the function for the figure
+########### Initiate the app
+external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+server = app.server
+app.title='knn'
+
+########### Set up the layout
+
+app.layout = html.Div(children=[
+    html.H1('K-Nearest Neighbors'),
+    html.Div([
+        html.Div([
+            html.Div([
+                html.H6('Petal Length'),
+                dcc.Slider(
+                    id='petal-length',
+                    min=1,
+                    max=8,
+                    step=0.1,
+                    marks={i:str(i) for i in range(1, 9)},
+                    value=5
+                ),
+                html.Br(),
+            ], className='six columns'),
+            html.Div([
+                html.H6('Petal Width'),
+                dcc.Slider(
+                    id='petal-width',
+                    min=0.1,
+                    max=3,
+                    step=0.1,
+                    marks={i:str(i) for i in range(0, 4)},
+                    value=1.3,
+                ),
+                html.Br(),
+            ], className='six columns'),
+            html.Br(),
+        ], className='twelve columns'),
+        html.Div([
+            html.H6(id='message'),
+            dcc.Graph(
+                id='figure-1'
+            ),
+
+        ], className='twelve columns'),
+
+    html.Br(),
+    html.A('Code on Github', href='https://github.com/austinlasseter/knn_iris_plotly'),
+    ])
+])
+
+########## Define Callbacks
+
+
+# Message callback
+@app.callback(Output('message', 'children'),
+              [Input('petal-length', 'value'),
+               Input('petal-width', 'value')])
+def radio_results(val0, val1):
+    new_observation0=[[val0, val1]]
+    prediction=model.predict(new_observation0)
+    specieslist=['setosa/red', 'versicolor/yellow', 'virginica/blue']
+    species =prediction[0]
+    return f'The predicted species is {specieslist[species]}'
+
+
+# Figure callback
+@app.callback(Output('figure-1', 'figure'),
+              [Input('petal-length', 'value'),
+               Input('petal-width', 'value')])
 def display_figure(val0, val1):
     ########## Make a prediction & find its neighbors
     new_observation0=[[val0, val1]]
@@ -81,75 +150,7 @@ def display_figure(val0, val1):
     return fig
 
 
-########### Initiate the app
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-server = app.server
-app.title='knn'
 
-########### Set up the layout
-
-app.layout = html.Div(children=[
-    html.H1('K-Nearest Neighbors'),
-    html.Div([
-        html.Div([
-            html.Div([
-                html.H6('Petal Length'),
-                dcc.Slider(
-                    id='petal-length',
-                    min=1,
-                    max=8,
-                    step=0.1,
-                    marks={i:str(i) for i in range(1, 9)},
-                    value=5
-                ),
-                html.Br(),
-            ], className='six columns'),
-            html.Div([
-                html.H6('Petal Width'),
-                dcc.Slider(
-                    id='petal-width',
-                    min=0.1,
-                    max=3,
-                    step=0.1,
-                    marks={i:str(i) for i in range(0, 4)},
-                    value=1.3,
-                ),
-                html.Br(),
-            ], className='six columns'),
-            html.Br(),
-        ], className='twelve columns'),
-        html.Div([
-            dcc.Graph(
-                id='figure-1'
-            ),
-            html.Div(id='message'),
-        ], className='twelve columns'),
-
-    html.Br(),
-    html.A('Code on Github', href='https://github.com/austinlasseter/knn_iris_plotly'),
-    ])
-])
-
-########## Define Callbacks
-
-# Figure callback
-@app.callback(Output('figure-1', 'figure'),
-              [Input('petal-length', 'value'),
-               Input('petal-width', 'value')])
-def radio_results(val0, val1):
-    return display_figure(val0, val1)
-
-# Message callback
-@app.callback(Output('message', 'children'),
-              [Input('petal-length', 'value'),
-               Input('petal-width', 'value')])
-def radio_results(val0, val1):
-    new_observation0=[[val0, val1]]
-    prediction=model.predict(new_observation0)
-    specieslist=['setosa/red', 'versicolor/yellow', 'virginica/blue']
-    species =prediction[0]
-    return f'The predicted species is {specieslist[species]}'
 
 
 ############ Deploy
