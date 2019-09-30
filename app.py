@@ -74,7 +74,7 @@ app.layout = html.Div(children=[
 def radio_results(val0, val1):
     new_observation0=[[val0, val1]]
     prediction=model.predict(new_observation0)
-    specieslist=['setosa/red', 'versicolor/yellow', 'virginica/blue']
+    specieslist=['setosa/red', 'versicolor/blue', 'virginica/yellow']
     species =prediction[0]
     return f'The predicted species is {specieslist[species]}'
 
