@@ -94,7 +94,7 @@ def display_results(k, value0, value1):
     prediction=model.predict(new_observation)
     specieslist=['setosa (red)', 'versicolor (blue)', 'virginica (green)']
     species =prediction[0]
-    return f'The predicted species is {specieslist[species]}'
+    return f'For a flower with sepal length {value0} and petal length {value1}, the predicted species is {specieslist[species]}.'
 
 
 # Figure callback
