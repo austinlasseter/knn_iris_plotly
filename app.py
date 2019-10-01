@@ -157,7 +157,7 @@ def display_figure(k, value0, value1):
                 text='green: virginica<br>blue: versicolor<br>red: setosa',
                 align='left',
                 showarrow=False,
-                x=7.3,
+                x=7.4,
                 y=1.5,
                 bordercolor='black',
                 borderwidth=1
