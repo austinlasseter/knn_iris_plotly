@@ -19,7 +19,7 @@ train=pd.read_pickle('resources/train.pkl')
 ########### Set up the layout
 
 app.layout = html.Div(children=[
-    html.H1('K-Neighbors Classifier'),
+    html.H1('Classification of Iris Flowers'),
     html.Div([
         html.Div([
             html.Div([], className='one column'),
@@ -148,7 +148,7 @@ def display_figure(k, value0, value1):
 
     # define the layout of the graphic
     layout = go.Layout(
-        title = 'Classification of Iris Flowers', # Graph title
+        # title = 'Classification of Iris Flowers', # Graph title
         xaxis = dict(title = 'Sepal Length'), # x-axis label
         yaxis = dict(title = 'Petal Length'), # y-axis label
         hovermode ='closest', # handles multiple points landing on the same vertical
