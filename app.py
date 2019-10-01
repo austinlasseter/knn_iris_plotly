@@ -13,22 +13,32 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 server = app.server
 app.title='knn'
 
-########### Read in the model and dataset ######
-file = open('resources/final_model.pkl', 'rb')
-model=pickle.load(file)
-file.close()
+########### Read in the dataset ######
 train=pd.read_pickle('resources/train.pkl')
 
 ########### Set up the layout
 
 app.layout = html.Div(children=[
-    html.H1('K-Nearest Neighbors'),
+    html.H1('K-Neighbors Classifier'),
     html.Div([
         html.Div([
+            html.Div([], className='one column'),
+            html.Div([
+                html.H6('Sepal Length'),
+                dcc.Slider(
+                    id='slider-1',
+                    min=1,
+                    max=8,
+                    step=0.1,
+                    marks={i:str(i) for i in range(1, 9)},
+                    value=5
+                ),
+                html.Br(),
+            ], className='four columns'),
             html.Div([
                 html.H6('Petal Length'),
                 dcc.Slider(
-                    id='petal-length',
+                    id='slider-2',
                     min=1,
                     max=8,
                     step=0.1,
@@ -36,29 +46,22 @@ app.layout = html.Div(children=[
                     value=5
                 ),
                 html.Br(),
-            ], className='six columns'),
+            ], className='four columns'),
             html.Div([
-                html.H6('Petal Width'),
-                dcc.Slider(
-                    id='petal-width',
-                    min=1,
-                    max=8,
-                    step=0.1,
-                    marks={i:str(i) for i in range(1, 9)},
+                html.H6('# of Neighbors:'),
+                dcc.Dropdown(
+                    id='k-drop',
+                    options=[{'label': i, 'value': i} for i in [5,10,15,20,25]],
                     value=5
                 ),
-                html.Br(),
-            ], className='six columns'),
+            ], className='two columns'),
+            html.Div([], className='one column'),
             html.Br(),
         ], className='twelve columns'),
         html.Div([
             html.H6(id='message'),
-            dcc.Graph(
-                id='figure-1'
-            ),
-
+            dcc.Graph(id='figure-1'),
         ], className='twelve columns'),
-
     html.Br(),
     html.A('Code on Github', href='https://github.com/austinlasseter/knn_iris_plotly'),
     ])
@@ -69,9 +72,15 @@ app.layout = html.Div(children=[
 
 # Message callback
 @app.callback(Output('message', 'children'),
-              [Input('petal-length', 'value'),
-               Input('petal-width', 'value')])
-def display_results(value0, value1):
+              [Input('k-drop', 'value'),
+               Input('slider-1', 'value'),
+               Input('slider-2', 'value')])
+def display_results(k, value0, value1):
+    # read in the correct model
+    file = open(f'resources/model_k{k}.pkl', 'rb')
+    model=pickle.load(file)
+    file.close()
+    # define the new observation from the slide values
     new_observation=[[value0, value1]]
     prediction=model.predict(new_observation)
     specieslist=['setosa (red)', 'versicolor (blue)', 'virginica (green)']
@@ -81,11 +90,17 @@ def display_results(value0, value1):
 
 # Figure callback
 @app.callback(Output('figure-1', 'figure'),
-              [Input('petal-length', 'value'),
-               Input('petal-width', 'value')])
-def display_figure(val0, val1):
-    ########## Make a prediction & find its neighbors
-    new_observation=[[val0, val1]]
+              [Input('k-drop', 'value'),
+               Input('slider-1', 'value'),
+               Input('slider-2', 'value')])
+def display_figure(k, value0, value1):
+    # read in the correct model
+    file = open(f'resources/model_k{k}.pkl', 'rb')
+    model=pickle.load(file)
+    file.close()
+    # define the new observation from the slide values
+    new_observation=[[value0, value1]]
+    # predict and find its neighbors
     prediction=model.predict(new_observation)
     neighbors=list(model.kneighbors(new_observation)[1][0])
     df_neighbors=train.iloc[neighbors, :]
@@ -133,10 +148,21 @@ def display_figure(val0, val1):
 
     # define the layout of the graphic
     layout = go.Layout(
-        title = 'K-Nearest Neighbors', # Graph title
+        title = 'Classification of Iris Flowers', # Graph title
         xaxis = dict(title = 'Sepal Length'), # x-axis label
         yaxis = dict(title = 'Petal Length'), # y-axis label
-        hovermode ='closest' # handles multiple points landing on the same vertical
+        hovermode ='closest', # handles multiple points landing on the same vertical
+        annotations=[
+            go.layout.Annotation(
+                text='green: virginica<br>blue: versicolor<br>red: setosa',
+                align='left',
+                showarrow=False,
+                x=7.3,
+                y=1.5,
+                bordercolor='black',
+                borderwidth=1
+            )
+        ]
     )
 
     # Define and update the figure
