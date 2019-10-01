@@ -57,12 +57,22 @@ app.layout = html.Div(children=[
             html.Div([], className='one column'),
             html.Br(),
         ], className='twelve columns'),
+        html.H6(id='message'),
         html.Div([
-            html.H6(id='message'),
-            dcc.Graph(id='figure-1'),
+            html.Div([
+                dcc.Graph(id='figure-1')
+            ], className='six columns'),
+            html.Div([
+                html.Img(src=app.get_asset_url('iris_petal_sepal.png'), style={'width': 'auto', 'height': '275px'}),
+            ], style={'textAlign': 'center',
+                    'padding-top': '100px',
+                    'vertical-align': 'middle'},
+            className='six columns'),
         ], className='twelve columns'),
     html.Br(),
     html.A('Code on Github', href='https://github.com/austinlasseter/knn_iris_plotly'),
+    html.Br(),
+    html.A('Image/data source:', href='http://blog.kaggle.com/2015/04/22/scikit-learn-video-3-machine-learning-first-steps-with-the-iris-dataset/')
     ])
 ])
 
