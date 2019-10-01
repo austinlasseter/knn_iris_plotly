@@ -41,11 +41,11 @@ app.layout = html.Div(children=[
                 html.H6('Petal Width'),
                 dcc.Slider(
                     id='petal-width',
-                    min=0.1,
-                    max=3,
+                    min=1,
+                    max=8,
                     step=0.1,
-                    marks={i:str(i) for i in range(0, 4)},
-                    value=1.3,
+                    marks={i:str(i) for i in range(1, 9)},
+                    value=5
                 ),
                 html.Br(),
             ], className='six columns'),
@@ -71,10 +71,10 @@ app.layout = html.Div(children=[
 @app.callback(Output('message', 'children'),
               [Input('petal-length', 'value'),
                Input('petal-width', 'value')])
-def radio_results(val0, val1):
-    new_observation0=[[val0, val1]]
-    prediction=model.predict(new_observation0)
-    specieslist=['setosa/red', 'versicolor/blue', 'virginica/yellow']
+def display_results(value0, value1):
+    new_observation=[[value0, value1]]
+    prediction=model.predict(new_observation)
+    specieslist=['setosa (red)', 'versicolor (blue)', 'virginica (green)']
     species =prediction[0]
     return f'The predicted species is {specieslist[species]}'
 
@@ -85,24 +85,27 @@ def radio_results(val0, val1):
                Input('petal-width', 'value')])
 def display_figure(val0, val1):
     ########## Make a prediction & find its neighbors
-    new_observation0=[[val0, val1]]
-    prediction=model.predict(new_observation0)
-    neighbors=list(model.kneighbors(new_observation0)[1][0])
+    new_observation=[[val0, val1]]
+    prediction=model.predict(new_observation)
+    neighbors=list(model.kneighbors(new_observation)[1][0])
     df_neighbors=train.iloc[neighbors, :]
 
-    brights = ['red', 'blue', 'yellow', 'white'] # https://www.canva.com/learn/100-color-combinations/
+    # define colors to be used in the graphic
+    brights = ['red', 'blue', 'green', 'white']
+    pales = ['pink', 'lightblue', 'lightgreen']
 
+    # define the 3 traces that go into 'data'
     trace1 = go.Scatter(
-        x = train['pl'],
-        y = train['pw'],
+        x = train['sl'],
+        y = train['pl'],
         mode = 'markers',
         marker=dict(
             color=train['species'],
             colorscale=brights[:3],)
     )
     trace0 = go.Scatter(
-        x = df_neighbors['pl'],
-        y = df_neighbors['pw'],
+        x = df_neighbors['sl'],
+        y = df_neighbors['pl'],
         mode = 'markers',
         marker=dict(
             size=12,
@@ -113,30 +116,31 @@ def display_figure(val0, val1):
         )
     )
     trace2 = go.Scatter(
-        x = [new_observation0[0][0]],
-        y = [new_observation0[0][1]],
+        x = [new_observation[0][0]],
+        y = [new_observation[0][1]],
         mode = 'markers',
         marker=dict(
-            size=12,
-            color='lightgreen',
-            symbol = 'pentagon',
+            size=18,
+            color=pales[prediction[0]],
+            symbol = 'star',
             line=dict(
                 color='darkblue',
                 width=1.5),
         )
     )
-
+    # combine the traces in the 'data' for the graphic
     data=[trace0, trace1, trace2]
 
+    # define the layout of the graphic
     layout = go.Layout(
         title = 'K-Nearest Neighbors', # Graph title
-        xaxis = dict(title = 'Petal Length'), # x-axis label
-        yaxis = dict(title = 'Petal Width'), # y-axis label
+        xaxis = dict(title = 'Sepal Length'), # x-axis label
+        yaxis = dict(title = 'Petal Length'), # y-axis label
         hovermode ='closest' # handles multiple points landing on the same vertical
     )
+
+    # Define and update the figure
     fig = go.Figure(data=data, layout=layout)
-    fig.update_xaxes(tick0=3, dtick=1)
-    fig.update_yaxes(tick0=3, dtick=1)
     fig.update_layout(
         showlegend=False,
     #     width = 800,
@@ -146,12 +150,10 @@ def display_figure(val0, val1):
           scaleratio = 1,
         )
     )
+    fig.update_xaxes(tick0=5, dtick=1)
+    fig.update_yaxes(tick0=3, dtick=1)
     return fig
 
-
-
-
-
-############ Deploy
+############ Execute the app
 if __name__ == '__main__':
     app.run_server()
