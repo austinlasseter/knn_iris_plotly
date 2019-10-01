@@ -6,7 +6,6 @@ from dash.dependencies import Input, Output, State
 import pandas as pd
 import pickle
 
-
 ########### Initiate the app
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
@@ -148,7 +147,7 @@ def display_figure(k, value0, value1):
 
     # define the layout of the graphic
     layout = go.Layout(
-        # title = 'Classification of Iris Flowers', # Graph title
+        title = f'KNN Classifier (neighbors={k})', # Graph title
         xaxis = dict(title = 'Sepal Length'), # x-axis label
         yaxis = dict(title = 'Petal Length'), # y-axis label
         hovermode ='closest', # handles multiple points landing on the same vertical
